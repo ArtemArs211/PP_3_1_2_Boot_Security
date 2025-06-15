@@ -62,20 +62,16 @@ public class UserServiceImpl implements UserService {
     public void update(Long id, User updatedUser) {
         User existingUser = userRepository.findByIdWithRoles(id)
                 .orElseThrow(() -> new IllegalArgumentException("User with id " + id + " not found"));
-
         existingUser.setName(updatedUser.getName());
         existingUser.setSurname(updatedUser.getSurname());
         existingUser.setEmail(updatedUser.getEmail());
         existingUser.setUsername(updatedUser.getUsername());
 
         if (!updatedUser.getPassword().isEmpty() &&
-                !existingUser.getPassword().equals(updatedUser.getPassword())) {
+                !passwordEncoder.matches(updatedUser.getPassword(), existingUser.getPassword())) {
             existingUser.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
         }
-
-        if (updatedUser.getRoles() != null && !updatedUser.getRoles().isEmpty()) {
-            existingUser.setRoles(updatedUser.getRoles());
-        }
+        existingUser.setRoles(updatedUser.getRoles());
 
         userRepository.save(existingUser);
     }
